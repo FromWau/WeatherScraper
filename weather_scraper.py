@@ -21,7 +21,7 @@ def main():
     parser.add_argument("location_code", type=str,                         help="specifies the location for where to check the weather")
     parser.add_argument("-n", "--n",     type=valid_n,    default=2,       help="specify how many forecasts should be scraped") 
     parser.add_argument("-u", "--unit",  type=valid_unit, default='C',     help="sets the unit, valid units: C, F, H")
-    parser.add_argument("-l", "--lang",  type=valid_lang, default='en-GB', help="sets the language, format: <languadge code>-<country code>")
+    parser.add_argument("-l", "--lang",  type=valid_lang, default='en-GB', help="sets the language, format: <language code>-<country code>")
     parser.add_argument("-d", "--dir",   type=valid_dir,                   help="specify the directory for the output.json file")
 
     args = parser.parse_args()
@@ -242,22 +242,22 @@ def scrap_it(location_code, n, unit, lang):
                 .div.div.h3.text   
             
             weather_stats_dict = {}
-            weather_stats_dict['Time'] = time
+            weather_stats_dict['time'] = time
 
             # Iterate over weather stats
             for li in weather.find( class_ = 'DaypartDetails--Content--hJ52O DaypartDetails--contentGrid--1SWty')\
                 .find( class_ = '' ).ul:
                 
                 # Get label (replace Feels Like with Temperature)
-                label = li.div.find_all('span')[0].text
-                if label == "Feels Like": label = "Temperature"
+                label = str(li.div.find_all('span')[0].text).lower()
+                if label == "feels like": label = "temperature"
                 value = li.div.find_all('span')[1].text
                 
                 weather_stats_dict[label] = value 
             
             # Add icon info as stat -> is cloudy, foggy,mostly sunny, ...    
             type = weather.find(class_ = 'DetailsSummary--condition--24gQw').svg.text   
-            weather_stats_dict['Type'] = type
+            weather_stats_dict['type'] = type
 
             list_weather_dict += [weather_stats_dict]
         
@@ -302,19 +302,19 @@ def scrap_it(location_code, n, unit, lang):
                         if len(day_night_avg) == 1:
 
                             item = day_night_avg[0].find_all('div')
-                            night_dict['avg. weather']['Rain Chance'] = item[0].span.text
-                            night_dict['avg. weather']['Wind']        = item[2].span.text
+                            night_dict['avg. weather']['rain chance'] = item[0].span.text
+                            night_dict['avg. weather']['wind']        = item[2].span.text
 
                         # day/night stats present
                         elif len(day_night_avg) == 2:
                             
                             item = day_night_avg[0].find_all('div')
-                            day_dict['avg. weather']['Rain Chance'] = item[0].span.text
-                            day_dict['avg. weather']['Wind']        = item[2].span.text
+                            day_dict['avg. weather']['rain chance'] = item[0].span.text
+                            day_dict['avg. weather']['wind']        = item[2].span.text
 
                             item = day_night_avg[1].find_all('div')
-                            night_dict['avg. weather']['Rain Chance'] = item[0].span.text
-                            night_dict['avg. weather']['Wind']        = item[2].span.text
+                            night_dict['avg. weather']['rain chance'] = item[0].span.text
+                            night_dict['avg. weather']['wind']        = item[2].span.text
                                 
 
                         # Add day sunrise and sunset
