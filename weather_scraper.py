@@ -159,72 +159,79 @@ def scrap_it(location_code, n, unit, lang):
     data['request']['last_updated'] = last_updated.strftime("%Y-%m-%d %H:%M:%S")
 
     data['location']['forecasts'] = {}
-    data['location']['forecasts']['dates'] = {}
+    data['location']['forecasts']['dates'] = []
    
 
 
+    
 
 
-
-    # Check if yeserday night
-    day_night = page_days.find( id = re.compile('detailIndex0$') )
-
-    if day_night != None:
-            
-        # get day and check if we are on the same day
-        day_night_ugly_date = day_night.find('span', class_ = 'DailyContent--daypartDate--2A3Wi').text
-        day_night_day = int(day_night_ugly_date.split(' ')[1])
+#    # Check if yeserday night
+#    day_night = page_days.find( id = re.compile('detailIndex0$') )
+#
+#    if day_night != None:
+#            
+#        # get day and check if we are on the same day
+#        day_night_ugly_date = day_night.find('span', class_ = 'DailyContent--daypartDate--2A3Wi').text
+#        day_night_day = int(day_night_ugly_date.split(' ')[1])
+#        
+#        # TODO Check if it is yesterday night (eg 02:00) and get the night stats
+#        
+#        # idk if works yet
+#        yesterday = hourly_date - timedelta(days=1)
+#        if day_night_day == yesterday.day:
+#            was_yesterday = True
+#
+#            str_yesterday = str(yesterday.strftime("%Y-%m-%d"))
+#                        
+#            #data['location']['forecasts']['dates'][str_yesterday] = {}
+#            #data['location']['forecasts']['dates'][str_yesterday]['night'] = {}
+#            
+#            # date add night moonrise and moonset
+#            moonrise_time = day_night.find('span', attrs={ "data-testid" : "MoonriseTime" })
+#            moonset_time  = day_night.find('span', attrs={ "data-testid" : "MoonsetTime" })
+#            moonphase     = day_night.find('span', attrs={ "data-testid" : "moonPhase" })
+#            
+#            weather_dict = { 'night' : {} }
+#
+#            if moonrise_time != None:
+#                weather_dict['night']['moonrise']  = moonrise_time.text
+#            if moonset_time != None:
+#                weather_dict['night']['moonset']   = moonset_time.text
+#            if moonphase != None:
+#                weather_dict['night']['moonphase'] = moonphase.text
+#            
+#            dict_yesterday = { str_date : { 'weather':[] } }
+#            dict_yesterday[str_date]['weather'] += weather_dict
+#            data['location']['forecasts']['dates'] += dict_yesterday
+#
+#        else:
+#            was_yesterday = False
         
-        # TODO Check if it is yesterday night (eg 02:00) and get the night stats
-        
-        # idk if works yet
-        yesterday = hourly_date - timedelta(days=1)
-        if day_night_day == yesterday.day:
-            was_yesterday = True
-
-            str_yesterday = str(yesterday.strftime("%Y-%m-%d"))
-            
-            data['location']['forecasts']['dates'][str_yesterday] = {}
-            data['location']['forecasts']['dates'][str_yesterday]['night'] = {}
-            
-            # date add night moonrise and moonset
-            moonrise_time = day_night.find('span', attrs={ "data-testid" : "MoonriseTime" })
-            moonset_time  = day_night.find('span', attrs={ "data-testid" : "MoonsetTime" })
-            moonphase     = day_night.find('span', attrs={ "data-testid" : "moonPhase" })
-            
-            if moonrise_time != None:
-                data['location']['forecasts']['dates'][str_yesterday]['night']['moonrise']  = moonrise_time.text
-            if moonset_time != None:
-                data['location']['forecasts']['dates'][str_yesterday]['night']['moonset']   = moonset_time.text
-            if moonphase != None:
-                data['location']['forecasts']['dates'][str_yesterday]['night']['moonphase'] = moonphase.text
-        else:
-            was_yesterday = False
 
 
+    
+    
+    # list of the weather stats per hour for a date
+    list_weather_dict = []
+    
+    # list of dicts of dates and the list_weather_dict
+    list_dates = []
+    
+    # list of date stats combined with the weather and day_night stats
+    list_dates_dict = []
 
+   
 
-
-
-
-
-
-
-
-    # Iterate over n forecasts and create the weather structure
+    # Iterate over n forecasts and create the weather_dict and add to list_dates
     for index in range(0, n):
         
+        # Check if its a new date section
+        # if yes: Clear weather_dict
         ugly_date = page_hourly.find( 'h2', id = re.compile('currentDateId' + str(index) + '$') )
         if ugly_date != None:
-            
-            # Format the date and add it to dict
-            ugly_date = str(ugly_date.text) + ' ' + str(datetime.now().year)
-            hourly_date = datetime.strptime(ugly_date, '%A, %d %B %Y')
-            str_date = hourly_date.strftime('%Y-%m-%d')
-            
-            data['location']['forecasts']['dates'][str_date] = {}
-            data['location']['forecasts']['dates'][str_date]['weather'] = {}
-   
+            list_weather_dict = []
+
 
         # Check if its a new weather section
         weather = page_hourly.find( id = re.compile('detailIndex' + str(index) + '$') )
@@ -232,11 +239,11 @@ def scrap_it(location_code, n, unit, lang):
             
             # Get the time for this weather section
             time = weather.find( class_ = 'Disclosure--Summary--UuybP DaypartDetails--Summary--3IBUr Disclosure--hideBorderOnSummaryOpen--ZdSDc' )\
-                .div.div.h3.text    
+                .div.div.h3.text   
             
-            # Add the time to the dict    
-            data['location']['forecasts']['dates'][str_date]['weather'][time] = {} 
-            
+            weather_stats_dict = {}
+            weather_stats_dict['Time'] = time
+
             # Iterate over weather stats
             for li in weather.find( class_ = 'DaypartDetails--Content--hJ52O DaypartDetails--contentGrid--1SWty')\
                 .find( class_ = '' ).ul:
@@ -245,88 +252,107 @@ def scrap_it(location_code, n, unit, lang):
                 label = li.div.find_all('span')[0].text
                 if label == "Feels Like": label = "Temperature"
                 value = li.div.find_all('span')[1].text
-            
-                data['location']['forecasts']['dates'][str_date]['weather'][time][label] = value 
+                
+                weather_stats_dict[label] = value 
             
             # Add icon info as stat -> is cloudy, foggy,mostly sunny, ...    
             type = weather.find(class_ = 'DetailsSummary--condition--24gQw').svg.text   
-            data['location']['forecasts']['dates'][str_date]['weather'][time]['Type'] = type
+            weather_stats_dict['Type'] = type
+
+            list_weather_dict += [weather_stats_dict]
+        
+        
+        # Check if its a new date section and build the final date dict
+        if ugly_date != None:
             
+            # Format the next date
+            ugly_date = str(ugly_date.text) + ' ' + str(datetime.now().year)
+            hourly_date = datetime.strptime(ugly_date, '%A, %d %B %Y')
+            list_dates += [ {hourly_date:list_weather_dict} ]
+   
 
 
-    for index in range(0,len(data['location']['forecasts']['dates'])):
-        day_night = page_days.find( id = re.compile('detailIndex' + str(index) + '$') )
-        if day_night != None:
+    # Create the date_dict ( day/night stats of each date, weather of the date and the date)
+    # and add it to the list_dates_dict
+    
+    # Iterate over all dates
+    for index, date_dict in enumerate(list_dates):
+        # Get the weather dicts of the date
+        for date in date_dict:
             
+            day_night = page_days.find( id = re.compile('detailIndex' + str(index) + '$') )
+            if day_night != None:
 
-            # Get day_night date
-            ugly_date = day_night.find('span', class_ = 'DailyContent--daypartDate--2A3Wi')
-            if ugly_date != None:
-                
-                # Format the date and add it to dict
-                ugly_date_day = str(ugly_date.text).split(' ')[1]
+                # Get day_night date
+                ugly_date = day_night.find('span', class_ = 'DailyContent--daypartDate--2A3Wi')
+                if ugly_date != None:
+                    
+                    # Format the date and add it to dict
+                    ugly_date_day = int(str(ugly_date.text).split(' ')[1])
 
-                
-                # Find the existiing date and add the day_night stats
-                for key in data['location']['forecasts']['dates'].keys():
-
-                    if re.search('^.*-' + ugly_date_day + '$', key):
-                        str_date = key 
+                    if ugly_date_day == date.day:
                         
                         # Add avg. rain chance and avg. wind    
                         day_night_avg = day_night.find_all(class_ = 'DailyContent--dataPoints--1Nya6')
                         
-                        # only night present
+                        day_dict   = { 'avg. weather':{} }
+                        night_dict = { 'avg. weather':{} }
+
+                        # only night stats present
                         if len(day_night_avg) == 1:
+
                             item = day_night_avg[0].find_all('div')
-                            
-                            data['location']['forecasts']['dates'][str_date]['night'] = {}
-                            data['location']['forecasts']['dates'][str_date]['night']['avg. weather'] = {}
-                            data['location']['forecasts']['dates'][str_date]['night']['avg. weather']['Rain Chance'] = item[0].span.text
-                            data['location']['forecasts']['dates'][str_date]['night']['avg. weather']['Wind']        = item[2].span.text
-                        
+                            night_dict['avg. weather']['Rain Chance'] = item[0].span.text
+                            night_dict['avg. weather']['Wind']        = item[2].span.text
+
                         # day/night stats present
                         elif len(day_night_avg) == 2:
-                           
-                            for item_count in range(0,2):
-                                item = day_night_avg[item_count].find_all('div')
-                                
-                                if item_count == 0: 
-                                    data['location']['forecasts']['dates'][str_date]['day'] = {}
-                                    data['location']['forecasts']['dates'][str_date]['day']  ['avg. weather'] = {}
-                                    data['location']['forecasts']['dates'][str_date]['day']  ['avg. weather']['Rain Chance'] = item[0].span.text
-                                    data['location']['forecasts']['dates'][str_date]['day']  ['avg. weather']['Wind']        = item[2].span.text
-                                else:
-                                    data['location']['forecasts']['dates'][str_date]['night'] = {}
-                                    data['location']['forecasts']['dates'][str_date]['night']['avg. weather'] = {}
-                                    data['location']['forecasts']['dates'][str_date]['night']['avg. weather']['Rain Chance'] = item[0].span.text
-                                    data['location']['forecasts']['dates'][str_date]['night']['avg. weather']['Wind']        = item[2].span.text
+                            
+                            item = day_night_avg[0].find_all('div')
+                            day_dict['avg. weather']['Rain Chance'] = item[0].span.text
+                            day_dict['avg. weather']['Wind']        = item[2].span.text
 
+                            item = day_night_avg[1].find_all('div')
+                            night_dict['avg. weather']['Rain Chance'] = item[0].span.text
+                            night_dict['avg. weather']['Wind']        = item[2].span.text
+                                
 
                         # Add day sunrise and sunset
                         sunrise_time = day_night.find('span', attrs={ "data-testid" : "SunriseTime" })
                         sunset_time  = day_night.find('span', attrs={ "data-testid" : "SunsetTime" })
 
                         if sunrise_time != None:
-                            data['location']['forecasts']['dates'][str_date]['day']['sunrise']  = sunrise_time.text
+                            day_dict['sunrise'] = sunrise_time.text     
                         if sunset_time != None:
-                            data['location']['forecasts']['dates'][str_date]['day']['sunset']   = sunset_time.text
+                            day_dict['sunset']  = sunset_time.text
+
 
                         # Add night moonrise and moonset
                         moonrise_time = day_night.find('span', attrs={ "data-testid" : "MoonriseTime" })
                         moonset_time  = day_night.find('span', attrs={ "data-testid" : "MoonsetTime" })
                         moonphase     = day_night.find('span', attrs={ "data-testid" : "moonPhase" })
                         
-                        if moonrise_time != None:
-                            data['location']['forecasts']['dates'][str_date]['night']['moonrise']  = moonrise_time.text
+                        if moonrise_time != None:    
+                            night_dict['moonrise']  = moonrise_time.text
                         if moonset_time != None:
-                            data['location']['forecasts']['dates'][str_date]['night']['moonset']   = moonset_time.text
+                            night_dict['moonset']   = moonset_time.text
                         if moonphase != None:
-                            data['location']['forecasts']['dates'][str_date]['night']['moonphase'] = moonphase. text
-
-
-
+                            night_dict['moonphase'] = moonphase.text
+                    
+                
+                        # Create the dict for the current date and set the values
+                        list_dates_dict +=  [ {
+                            'date' : date.strftime('%Y-%m-%d'),
+                            'weather' : date_dict[date],
+                            'day' : day_dict, 
+                            'night' : night_dict 
+                        } ]
+        
     
+
+    # Add the list_dates_dict to the json object
+    data['location']['forecasts'] = list_dates_dict
+
 
     json_data = json.dumps(data)
     return json_data
