@@ -1,8 +1,8 @@
 # WeatherScraper
-Scraps the weather.com site and returns an up to 48h weather forecast in json format.
+Scraps the weather.com site and returns a up to 48h weather forecast in json format.
 
 ## But why
-Primarly made to be piped into `jq` and used for a bar.  
+Primarily made to be piped into `jq` and used for a bar.  
 See `use_case_example.sh` for a script that can be used with polybar modules.
 
 ## Usage
@@ -25,107 +25,111 @@ options:
 
 ### How to change the location/ from where to get the location_code?
 Just go to https://weather.com/ and search for the desired city in the search.  
-For example searching for New York City will redirect you to:  
-https://weather.com/weather/today/l/96f2f84af9a5f5d452eb0574d4e4d8a840c71b05e22264ebdc0056433a642c84.
+For example, searching for London will redirect you to:  
+https://weather.com/weather/today/l/5d3ac36b50e4aa01e9916508005d45eab1dffb15cb59d5b38cce3ca54d24c65d
 
 The location_code is the last part of the url, so in this case:  
-96f2f84af9a5f5d452eb0574d4e4d8a840c71b05e22264ebdc0056433a642c84
+5d3ac36b50e4aa01e9916508005d45eab1dffb15cb59d5b38cce3ca54d24c65d
 
 
-## Example
-Get the next two weather forecasts for New York City:
+
+## Examples 
+
+### polybar Module
+```ini
+[module/weather-scraper]
+type              = custom/script
+exec              = cd ~/.config/polybar/scripts && ./use_case_example.sh
+internal          = 600
+
+label-font        = 1
+label             = %output%
+format-foreground = ${colors.primary}
+format-background = ${colors.background}
+```
+
+Displays on the bar:
+
+![alt text](https://raw.githubusercontent.com/FromWau/WeatherScraper/main/polybar-weather-module.png)
+
+
+
+### Bash
+Get the next two weather forecasts for London:
 ```shell
-python weather_scraper.py 96f2f84af9a5f5d452eb0574d4e4d8a840c71b05e22264ebdc0056433a642c84
+python weather_scraper.py 5d3ac36b50e4aa01e9916508005d45eab1dffb15cb59d5b38cce3ca54d24c65d
 ```
 
 Returns (pipe into jq for human readable output):
 ```json
 {
   "request": {
-    "timestamp": "2022-10-22 06:55:23",
+    "timestamp": "2022-10-22 07:54:07",
     "urls": [
-      "https://weather.com/en-GB/weather/hourbyhour/l/96f2f84af9a5f5d452eb0574d4e4d8a840c71b05e22264ebdc0056433a642c84?unit=m",
-      "https://weather.com/en-GB/weather/tenday/l/96f2f84af9a5f5d452eb0574d4e4d8a840c71b05e22264ebdc0056433a642c84?unit=m"
+      "https://weather.com/en-GB/weather/hourbyhour/l/5d3ac36b50e4aa01e9916508005d45eab1dffb15cb59d5b38cce3ca54d24c65d?unit=m",
+      "https://weather.com/en-GB/weather/tenday/l/5d3ac36b50e4aa01e9916508005d45eab1dffb15cb59d5b38cce3ca54d24c65d?unit=m"
     ],
-    "last_updated": "2022-10-22 06:55:00"
+    "last_updated": "2022-10-22 07:51:00"
   },
   "location": {
-    "city": "New York City",
-    "state": "NY",
-    "country": "United States",
-    "locale_timestamp": "2022-10-22 00:55:00",
+    "city": "London",
+    "state": "London",
+    "country": "England",
+    "locale_timestamp": "2022-10-22 06:51:00",
     "forecasts": [
       {
         "date": "2022-10-22",
-        "lowest temperature": "11°",
-        "highest temperature": "19°",
+        "lowest temperature": "14°",
+        "highest temperature": "18°",
         "weather": [
           {
-            "time": "1:00",
-            "temperature": "12°",
-            "feels like": "11°",
-            "info": "Clear Night",
+            "time": "7:00",
+            "temperature": "13°",
+            "feels like": "12°",
+            "info": "Partly Cloudy Night",
             "rain chance": "2%",
             "rain amount": "0 cm",
-            "humidity": "58%",
-            "wind": "WSW 8 km/h",
-            "cloud cover": "0%",
+            "humidity": "90%",
+            "wind": "SW 11 km/h",
+            "cloud cover": "33%",
             "uv index": "0 of 10"
           },
           {
-            "time": "2:00",
-            "temperature": "11°",
+            "time": "8:00",
+            "temperature": "12°",
             "feels like": "11°",
-            "info": "Clear Night",
+            "info": "Partly Cloudy",
             "rain chance": "2%",
             "rain amount": "0 cm",
-            "humidity": "59%",
-            "wind": "WSW 6 km/h",
-            "cloud cover": "0%",
+            "humidity": "90%",
+            "wind": "SW 10 km/h",
+            "cloud cover": "47%",
             "uv index": "0 of 10"
           }
         ],
-        "yesterday_night": {
-          "date": "2022-10-21",
-          "lowest temperature": "8°",
-          "highest temperature": "8°",
-          "night": {
-            "avg. weather": {
-              "temperature": "8°",
-              "info": "Clear Night",
-              "rain chance": "2%",
-              "humidity": "65%",
-              "wind": "SW 7 km/h",
-              "uv index": "0 of 10"
-            },
-            "moonrise": "2:55",
-            "moonset": "16:40",
-            "moonphase": "Waning Crescent"
-          }
-        },
         "day": {
           "avg. weather": {
-            "temperature": "19°",
-            "info": "Sunny",
-            "rain chance": "5%",
-            "humidity": "54%",
-            "wind": "SSW 7 km/h",
-            "uv index": "4 of 10"
+            "temperature": "18°",
+            "info": "Mostly Cloudy",
+            "rain chance": "15%",
+            "humidity": "81%",
+            "wind": "SSW 17 km/h",
+            "uv index": "1 of 10"
           },
-          "sunrise": "7:15",
-          "sunset": "18:05"
+          "sunrise": "7:36",
+          "sunset": "17:52"
         },
         "night": {
           "avg. weather": {
-            "temperature": "11°",
-            "info": "Mostly Cloudy Night",
-            "rain chance": "5%",
-            "humidity": "72%",
-            "wind": "SSW 7 km/h",
+            "temperature": "14°",
+            "info": "Scattered Showers",
+            "rain chance": "15%",
+            "humidity": "88%",
+            "wind": "SSW 17 km/h",
             "uv index": "0 of 10"
           },
-          "moonrise": "3:59",
-          "moonset": "17:02",
+          "moonrise": "3:36",
+          "moonset": "17:11",
           "moonphase": "Waning Crescent"
         }
       }
@@ -136,8 +140,16 @@ Returns (pipe into jq for human readable output):
 
 
 ## Setup
-Run to install dependencies: 
+
+Install python dependencies: 
 ```bash
 pip install -r requirements.txt
 ```
+Install jq (only needed for polybar or for selecting specific data):
+```bash
+pacman -S jq
+```
+
+
+
 
