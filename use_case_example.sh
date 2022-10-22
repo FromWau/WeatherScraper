@@ -52,7 +52,6 @@ then
     tmp_diff='→ '
 else
     tmp_diff='↘ '
-file
 fi
 
 echo "$icon1 $tmp1 $tmp_diff $icon2 $tmp2"
