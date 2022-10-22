@@ -37,62 +37,94 @@ Get the next two weather forecasts for New York City:
 python weather_scraper.py 96f2f84af9a5f5d452eb0574d4e4d8a840c71b05e22264ebdc0056433a642c84
 ```
 
-Returns (pipe into jq for pretty output):
+Returns (pipe into jq for human readable output):
 ```json
 {
   "request": {
-    "timestamp": "2022-10-20 11:31:17",
+    "timestamp": "2022-10-22 06:55:23",
     "urls": [
       "https://weather.com/en-GB/weather/hourbyhour/l/96f2f84af9a5f5d452eb0574d4e4d8a840c71b05e22264ebdc0056433a642c84?unit=m",
       "https://weather.com/en-GB/weather/tenday/l/96f2f84af9a5f5d452eb0574d4e4d8a840c71b05e22264ebdc0056433a642c84?unit=m"
     ],
-    "last_updated": "2022-10-20 11:28:00"
+    "last_updated": "2022-10-22 06:55:00"
   },
   "location": {
     "city": "New York City",
     "state": "NY",
     "country": "United States",
-    "locale_timestamp": "2022-10-20 05:28:00",
+    "locale_timestamp": "2022-10-22 00:55:00",
     "forecasts": [
       {
-        "date": "2022-10-20",
+        "date": "2022-10-22",
+        "lowest temperature": "11°",
+        "highest temperature": "19°",
         "weather": [
           {
-            "time": "6:00",
-            "temperature": "5°",
-            "wind": "SW 12 km/h",
-            "humidity": "66%",
-            "uv index": "0 of 10",
-            "cloud cover": "3%",
+            "time": "1:00",
+            "temperature": "12°",
+            "feels like": "11°",
+            "info": "Clear Night",
+            "rain chance": "2%",
             "rain amount": "0 cm",
-            "type": "Clear Night"
+            "humidity": "58%",
+            "wind": "WSW 8 km/h",
+            "cloud cover": "0%",
+            "uv index": "0 of 10"
           },
           {
-            "time": "7:00",
-            "temperature": "4°",
-            "wind": "SW 12 km/h",
-            "humidity": "70%",
-            "uv index": "0 of 10",
-            "cloud cover": "0%",
+            "time": "2:00",
+            "temperature": "11°",
+            "feels like": "11°",
+            "info": "Clear Night",
+            "rain chance": "2%",
             "rain amount": "0 cm",
-            "type": "Clear Night"
+            "humidity": "59%",
+            "wind": "WSW 6 km/h",
+            "cloud cover": "0%",
+            "uv index": "0 of 10"
           }
         ],
+        "yesterday_night": {
+          "date": "2022-10-21",
+          "lowest temperature": "8°",
+          "highest temperature": "8°",
+          "night": {
+            "avg. weather": {
+              "temperature": "8°",
+              "info": "Clear Night",
+              "rain chance": "2%",
+              "humidity": "65%",
+              "wind": "SW 7 km/h",
+              "uv index": "0 of 10"
+            },
+            "moonrise": "2:55",
+            "moonset": "16:40",
+            "moonphase": "Waning Crescent"
+          }
+        },
         "day": {
           "avg. weather": {
-            "rain chance": "2%",
-            "wind": "SW 20 km/h"
+            "temperature": "19°",
+            "info": "Sunny",
+            "rain chance": "5%",
+            "humidity": "54%",
+            "wind": "SSW 7 km/h",
+            "uv index": "4 of 10"
           },
-          "sunrise": "7:12",
-          "sunset": "18:08"
+          "sunrise": "7:15",
+          "sunset": "18:05"
         },
         "night": {
           "avg. weather": {
+            "temperature": "11°",
+            "info": "Mostly Cloudy Night",
             "rain chance": "5%",
-            "wind": "WSW 12 km/h"
+            "humidity": "72%",
+            "wind": "SSW 7 km/h",
+            "uv index": "0 of 10"
           },
-          "moonrise": "1:51",
-          "moonset": "16:16",
+          "moonrise": "3:59",
+          "moonset": "17:02",
           "moonphase": "Waning Crescent"
         }
       }
