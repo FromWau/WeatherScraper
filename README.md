@@ -2,7 +2,8 @@
 Scraps the weather.com site and returns an up to 48h weather forecast in json format.
 
 ## But why
-Primarly made to be piped into `jq` and used for polybar.
+Primarly made to be piped into `jq` and used for a bar.  
+See `use_case_example.sh` for a script that can be used with polybar modules.
 
 ## Usage
 ```bash
