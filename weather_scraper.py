@@ -276,8 +276,9 @@ def scrap_it(location_code, n, unit, lang):
                         yesterday = date - timedelta(days=1)
                         
                         # Get night stats for yesterday_night
-                        day_night_avg = day_night.find_all(class_ = 'DailyContent--dataPoints--1Nya6')
-                        
+                        #day_night_avg = day_night.find_all(class_ = 'DailyContent--dataPoints--1Nya6')
+                        day_night_avg = day_night.find_all('ul', attrs= {'data-testid':'DetailsTable'})
+
                         # only night stats present
                         night_dict = { 'avg. weather': {
                             'temperature' : '',
@@ -306,9 +307,9 @@ def scrap_it(location_code, n, unit, lang):
                         # Get wind
                         winds = day_night.find_all( attrs={ "data-testid" : "Wind" })
                         night_dict['avg. weather']['wind'] = winds[0].text
+                        
 
-
-                        lu = day_night.find(class_ = "DaypartDetails--DetailsTable--2VLwj DaypartDetails--col1--3kk-U DetailsTable--twoColumn--3ybwq").ul
+                        lu = day_night_avg
                         for li in lu:
                             label = str(li.div.find_all('span')[0].text).lower()
                             value = li.div.find_all('span')[1].text
@@ -335,8 +336,8 @@ def scrap_it(location_code, n, unit, lang):
                         # Get the next date -> actually today
                         day_night = page_days.find( id = re.compile('detailIndex' + str(index + 1) + '$') )
                         if day_night != None:
-
-                            ugly_date = day_night.find('span', class_ = 'DailyContent--daypartDate--2A3Wi')
+                            
+                            ugly_date = day_night.find(attrs = {'data-testid':'DailyContent'})
                             if ugly_date != None:
                                 ugly_date_day = int(str(ugly_date.text).split(' ')[1])
 
@@ -344,10 +345,11 @@ def scrap_it(location_code, n, unit, lang):
 
                     # its today
                     if ugly_date_day == date.day:
-                        
+                       
                         # Add avg. rain chance and avg. wind    
                         day_night_avg = day_night.find_all('ul', attrs= {'data-testid':'DetailsTable'})
                         
+
                         day_dict   = { 'avg. weather': {
                             'temperature' : '',
                             'info'        : '',

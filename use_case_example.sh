@@ -27,6 +27,8 @@ info_to_icon() {
             echo ' ';;
         'Rain')
             echo ' ';;
+        'Foggy')
+            echo ' ';;
         *)
             echo "$1";;
         esac
