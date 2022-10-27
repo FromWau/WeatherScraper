@@ -105,8 +105,11 @@ def scrap_it(location_code, n, unit, lang):
     page_days   = BeautifulSoup(requests.get(url_days  ).text, 'lxml')
 
     # Getting the location
-    location = page_hourly.find('span', class_ = 'LocationPageTitle--PresentationName--1QYny')\
+    location = page_hourly.find('span', attrs={'data-testid':'PresentationName'}) \
         .text.strip().split(', ')
+
+    
+
 
     # Init the dict
     data = {}
@@ -132,8 +135,7 @@ def scrap_it(location_code, n, unit, lang):
     hourly_date = datetime.strptime(ugly_date, '%A, %d %B %Y')
     
     # Get locale timestamp and add it to dict
-    ugly_time = page_hourly.find('div', class_ = 'HourlyForecast--timestamp--MVnBF')\
-        .text.strip('As of ').split(' ')[0].split(':')
+    ugly_time = page_hourly.find(attrs= {'data-testid':'daypartName'}).text.split(':')
 
     locale_date = hourly_date.replace(hour=int(ugly_time[0]), minute=int(ugly_time[1]))
     
@@ -218,7 +220,9 @@ def scrap_it(location_code, n, unit, lang):
             weather_stats_dict['rain chance'] = rain_chance.text
 
             # Iterate over detailed weather stats
-            lu = weather.find( class_ = 'DaypartDetails--Content--hJ52O DaypartDetails--contentGrid--1SWty').ul
+            #lu = weather.find( class_ = 'DaypartDetails--Content--hJ52O DaypartDetails--contentGrid--1SWty').ul
+            lu = weather.find( attrs={'data-testid':'DetailsTable'} )
+
             for li in lu:
                 # Get label and values
                 label = str(li.div.find_all('span')[0].text).lower()
@@ -226,6 +230,7 @@ def scrap_it(location_code, n, unit, lang):
                 
                 weather_stats_dict[label] = value 
             # Add all weather_stats to the list of weather dict
+
             list_weather_dict += [weather_stats_dict]
                   
         
@@ -256,11 +261,11 @@ def scrap_it(location_code, n, unit, lang):
             if day_night != None:
 
                 # Get day_night date
-                ugly_date = day_night.find('span', class_ = 'DailyContent--daypartDate--2A3Wi')
+                ugly_date = day_night.find(attrs = {'data-testid':'DailyContent'})
                 if ugly_date != None:
                     
                     # Format the date and add it to dict
-                    ugly_date_day = int(str(ugly_date.text).split(' ')[1])
+                    ugly_date_day = int(str(ugly_date.h3.span.text).split(' ')[1])
                     
                     # if only today is yesterday night eg.: 01:00
                     its_yesterday_night = False
@@ -341,7 +346,7 @@ def scrap_it(location_code, n, unit, lang):
                     if ugly_date_day == date.day:
                         
                         # Add avg. rain chance and avg. wind    
-                        day_night_avg = day_night.find_all(class_ = 'DailyContent--dataPoints--1Nya6')
+                        day_night_avg = day_night.find_all('ul', attrs= {'data-testid':'DetailsTable'})
                         
                         day_dict   = { 'avg. weather': {
                             'temperature' : '',
@@ -383,7 +388,7 @@ def scrap_it(location_code, n, unit, lang):
                             night_dict['avg. weather']['wind'] = winds[0].text
 
 
-                            lu = day_night.find(class_ = "DaypartDetails--DetailsTable--2VLwj DaypartDetails--col1--3kk-U DetailsTable--twoColumn--3ybwq").ul
+                            lu = day_night_avg
                             for li in lu:
                                 label = str(li.div.find_all('span')[0].text).lower()
                                 value = li.div.find_all('span')[1].text
@@ -422,33 +427,30 @@ def scrap_it(location_code, n, unit, lang):
                             night_dict['avg. weather']['wind'] = winds[1].text
 
                             
-                            lu = day_night.find(class_ = "DaypartDetails--DetailsTable--2VLwj DaypartDetails--col1--3kk-U DetailsTable--twoColumn--3ybwq").ul
-                            for li in lu:
+                            lu = day_night_avg 
+                            for index, li in enumerate(lu):
                                 label = str(li.div.find_all('span')[0].text).lower()
                                 value = li.div.find_all('span')[1].text
 
-                                # moon stats should not be in avg weather
-                                if label.startswith('sun'):
-                                    day_dict[label] = value
+                                if index < 5:
+                                    
+                                    # sun stats should not be in avg weather
+                                    if label.startswith('sun') or label.startswith('moon'):
+                                        day_dict[label] = value
+                                    else:
+                                        day_dict['avg. weather'][label] = value
+
                                 else:
-                                    day_dict['avg. weather'][label] = value
+                                    # moon stats should not be in avg weather
+                                    if label.startswith('sun') or label.startswith('moon'):
+                                        night_dict[label] = value
+                                    else:
+                                        night_dict['avg. weather'][label] = value
                             
 
-                            lu = day_night.find(class_ = "DaypartDetails--DetailsTable--2VLwj DaypartDetails--col2--2XNui DetailsTable--twoColumn--3ybwq").ul
-                            for li in lu:
-                                label = str(li.div.find_all('span')[0].text).lower()
-                                value = li.div.find_all('span')[1].text
 
-                                # moon stats should not be in avg weather
-                                if label.startswith('moon'):
-                                    night_dict[label] = value
-                                else:
-                                    night_dict['avg. weather'][label] = value
-
-                        
                         moonphase = day_night.find('span', attrs={ "data-testid" : "moonPhase" })
                         night_dict['moonphase'] = moonphase.text
-
                     
                         # Create the dict for the current date and set the values
                         if its_yesterday_night:
