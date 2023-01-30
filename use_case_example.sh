@@ -29,6 +29,12 @@ info_to_icon() {
             echo ' ';;
         'Foggy')
             echo ' ';;
+        'Rain and Snow')
+            echo '  ';;
+        'Snow')
+            echo ' ';;
+        'Wind')
+            echo ' ';;
         *)
             echo "$1";;
         esac
