@@ -140,16 +140,19 @@ Returns (pipe into jq for human readable output):
 
 
 ## Setup
-
-Install python dependencies: 
+Install uv: 
 ```bash
-pip install -r requirements.txt
+pacman -S uv
 ```
+
+Build and run:
+```bash 
+uv build
+uv run weather_scraper.py -h
+```
+
 Install jq (only needed for polybar or for selecting specific data):
 ```bash
 pacman -S jq
 ```
-
-
-
 
