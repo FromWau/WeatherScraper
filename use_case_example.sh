@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # To change city change the LOCATION_CODE.
 LOCATION_CODE='38d35340a098212bc3ae7aa6ff89ce95a7eed769997999f8ad0804d2f3ccd560'
