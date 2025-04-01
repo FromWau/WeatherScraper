@@ -1,0 +1,16 @@
+[project]
+name = "weatherscraper"
+version = "0.1.0"
+description = "Scraps the weather.com site and returns a up to 48h weather forecast in json format."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "beautifulsoup4==4.11.1",
+    "certifi==2022.9.24",
+    "charset-normalizer==2.1.1",
+    "idna==3.4",
+    "lxml==4.9.1",
+    "requests==2.28.1",
+    "soupsieve==2.3.2.post1",
+    "urllib3==1.26.12",
+]
