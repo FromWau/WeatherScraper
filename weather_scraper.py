@@ -42,7 +42,7 @@ def main():
   
 # check if url is valid via regex
 def valid_url(value):
-    if not re.search('^https://weather.com/\S+/weather/hourbyhour/l/\S+$', value):
+    if not re.search(r'^https://weather.com/\S+/weather/hourbyhour/l/\S+$', value):
         raise argparse.ArgumentTypeError(f"'{value}' is not a valid url")
     return value
 
@@ -132,7 +132,7 @@ def scrap_it(location_code, n, unit, lang):
     # Find out the current date 
     ugly_date = page_hourly.find( 'h2', id = re.compile('currentDateId0$') )
     ugly_date = str(ugly_date.text) + ' ' + str(datetime.now().year)
-    hourly_date = datetime.strptime(ugly_date, '%A, %d %B %Y')
+    hourly_date = datetime.strptime(ugly_date, '%A %d %B %Y')
     
     # Get locale timestamp and add it to dict
     ugly_time = page_hourly.find(attrs= {'data-testid':'daypartName'}).text.split(':')
@@ -203,7 +203,7 @@ def scrap_it(location_code, n, unit, lang):
             }
 
             # Get the time
-            time = weather.find('h3',   attrs={ "data-testid" : "daypartName" })
+            time = weather.find('h2',   attrs={ "data-testid" : "daypartName" })
             weather_stats_dict['time'] = time.text
             
             # Get the temperature
@@ -211,7 +211,7 @@ def scrap_it(location_code, n, unit, lang):
             weather_stats_dict['temperature'] = temp.text
             
             # Get icon info -> is cloudy, foggy,mostly sunny, stormy, ...    
-            info = weather.find( attrs={ "data-testid" : "Icon" })
+            info = weather.find("title")
             weather_stats_dict['info'] = info.text
 
 
@@ -239,7 +239,7 @@ def scrap_it(location_code, n, unit, lang):
             
             # Format the next date
             ugly_date = str(ugly_date.text) + ' ' + str(datetime.now().year)
-            hourly_date = datetime.strptime(ugly_date, '%A, %d %B %Y')
+            hourly_date = datetime.strptime(ugly_date, '%A %d %B %Y')
             list_dates += [ {hourly_date:list_weather_dict} ]
    
 
@@ -265,7 +265,7 @@ def scrap_it(location_code, n, unit, lang):
                 if ugly_date != None:
                     
                     # Format the date and add it to dict
-                    ugly_date_day = int(str(ugly_date.h3.span.text).split(' ')[1])
+                    ugly_date_day = int(str(ugly_date.h2.span.text).split(' ')[1])
                     
                     # if only today is yesterday night eg.: 01:00
                     its_yesterday_night = False
